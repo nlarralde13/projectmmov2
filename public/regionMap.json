@@ -1,0 +1,36 @@
+{
+  "worldName": "PrototypeWorld",
+  "seed": "IlikePickles",
+  "dimensions": {
+    "width": 50,
+    "height": 50
+  },
+  "regions": [
+    {
+      "id": "region_1",
+      "name": "The Verdant March",
+      "bounds": {
+        "startX": 0,
+        "startY": 0,
+        "endX": 49,
+        "endY": 49
+      },
+      "continents": [
+        {
+          "id": "continent_1",
+          "name": "Eldara",
+          "bounds": {
+            "startX": 5,
+            "startY": 5,
+            "endX": 45,
+            "endY": 45
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "created": "2025-07-15T12:00:00Z",
+    "version": "0.1"
+  }
+}
