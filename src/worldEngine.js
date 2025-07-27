@@ -40,10 +40,9 @@ export function validateRegionMap() {
 }
 
 /**
- * Generates a world using per-region biome rules and landmass blob logic.
- *
- * @param {Object} biomeRules - parsed biome rules per 3x3 region
- * @returns {{terrainMap, biomeMap, heightMap, meta}}
+ * Generates the world map using base water and region-driven landmass blobs.
+ * @param {Object} biomeRules
+ * @returns {Object} { terrainMap, biomeMap, heightMap, meta }
  */
 export function generateWorld(biomeRules = {}) {
     if (!validateRegionMap()) {
@@ -62,7 +61,7 @@ export function generateWorld(biomeRules = {}) {
     const biomeMap = [];
     const heightMap = [];
 
-    // 🌊 Step 1: Start with all tiles as water
+    // Initialize all tiles as ocean
     for (let y = 0; y < height; y++) {
         terrainMap[y] = [];
         biomeMap[y] = [];
@@ -86,43 +85,55 @@ export function generateWorld(biomeRules = {}) {
         }
     }
 
-    console.log('[WorldEngine] 🌊 Initialized map as ocean');
+    console.log('[WorldEngine] 🌊 Initialized base map as water');
 
-    // 🗺️ Step 2: Region-configurable landmass blob generation
+    // Landmass configuration per region
     const regionLandmassConfig = {
-        NW: { count: 10, radius: 10 },
-        N:  { count: 3, radius: 12 },
-        NE: { count: 2, radius: 10 },
-        W:  { count: 3, radius: 12 },
-        C:  { count: 1, radius: 50 },
-        E:  { count: 3, radius: 12 },
-        SW: { count: 2, radius: 10 },
-        S:  { count: 3, radius: 12 },
-        SE: { count: 2, radius: 10 }
+        NW: { count: 1, radius: 30, type: 'archipelago' },
+        N:  { count: 3, radius: 12, type: 'continent' },
+        NE: { count: 2, radius: 10, type: 'island' },
+        W:  { count: 3, radius: 12, type: 'continent' },
+        C:  { count: 1, radius: 50, type: 'continent' },
+        E:  { count: 3, radius: 12, type: 'continent' },
+        SW: { count: 3, radius: 10, type: 'island' },
+        S:  { count: 3, radius: 12, type: 'continent' },
+        SE: { count: 4, radius: 9,  type: 'archipelago' }
     };
 
+    // Place landmasses
     for (const [regionKey, config] of Object.entries(regionLandmassConfig)) {
         const rule = biomeRules[regionKey];
         if (!rule) continue;
 
         for (let i = 0; i < config.count; i++) {
-            const tries = 25;
+            const maxTries = 25;
             let placed = false;
 
-            for (let attempt = 0; attempt < tries && !placed; attempt++) {
+            for (let attempt = 0; attempt < maxTries && !placed; attempt++) {
                 const cx = Math.floor(Math.random() * width);
                 const cy = Math.floor(Math.random() * height);
                 if (getRegionName(cx, cy, width, height) === regionKey) {
-                    addLandmassBlob(terrainMap, cx, cy, config.radius, rule.biomeWeights, ['mainland']);
+                    addLandmassBlob(
+                        terrainMap,
+                        cx,
+                        cy,
+                        config.radius,
+                        rule.biomeWeights,
+                        {
+                            type: config.type || 'continent',
+                            edgeBiomes: config.edgeBiomes || { plains: 0.8, beach: 0.2 },
+                            tags: ['mainland', regionKey]
+                        }
+                    );
                     placed = true;
                 }
             }
         }
     }
 
-    console.log('[WorldEngine] 🏝️ Landmass generation complete.');
+    console.log('[WorldEngine] 🏝️ Landmass blobs generated.');
 
-    // 🗺️ Step 3: Update biomeMap and elevationMap from terrainMap
+    // Final pass: fill biomeMap and heightMap from terrain
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const tile = terrainMap[y][x];
@@ -140,7 +151,10 @@ export function generateWorld(biomeRules = {}) {
 }
 
 /**
- * Generates logical chunk metadata from biomeMap.
+ * Splits the map into logical chunks for lazy rendering, etc.
+ * @param {Array<Array<string>>} biomeMap
+ * @param {number} chunkSize
+ * @returns {Array<Object>} chunk metadata
  */
 export function generateChunks(biomeMap, chunkSize = 100) {
     const height = biomeMap.length;

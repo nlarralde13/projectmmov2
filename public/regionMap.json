@@ -2,8 +2,8 @@
   "worldName": "Aurellia v1",
   "seed": "IlikePickles",
   "dimensions": {
-    "width": 256,
-    "height": 256
+    "width": 25,
+    "height": 25
   },
   "regions": [
     {
