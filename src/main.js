@@ -96,6 +96,7 @@ function bindInteractions(canvas, worldData, chunks, draw) {
 
 
 
+
 function createMainLayout() {
     const container = document.createElement('div');
     container.id = 'app-container';
