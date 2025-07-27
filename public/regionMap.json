@@ -1,36 +1,38 @@
 {
-  "worldName": "Aurellia v1",
-  "seed": "IlikePickles",
-  "dimensions": {
-    "width": 25,
-    "height": 25
+  "NW": {
+    "label": "Northwest",
+    "landmassSize": "large"
   },
-  "regions": [
-    {
-      "id": "region_1",
-      "name": "The Verdant March",
-      "bounds": {
-        "startX": 0,
-        "startY": 0,
-        "endX": 49,
-        "endY": 49
-      },
-      "continents": [
-        {
-          "id": "continent_1",
-          "name": "Eldara",
-          "bounds": {
-            "startX": 5,
-            "startY": 5,
-            "endX": 45,
-            "endY": 45
-          }
-        }
-      ]
-    }
-  ],
-  "metadata": {
-    "created": "2025-07-15T12:00:00Z",
-    "version": "0.1"
+  "N": {
+    "label": "North",
+    "landmassSize": "medium"
+  },
+  "NE": {
+    "label": "Northeast",
+    "landmassSize": "small"
+  },
+  "W": {
+    "label": "West",
+    "landmassSize": "medium"
+  },
+  "C": {
+    "label": "Center",
+    "landmassSize": "large"
+  },
+  "E": {
+    "label": "East",
+    "landmassSize": "medium"
+  },
+  "SW": {
+    "label": "Southwest",
+    "landmassSize": "small"
+  },
+  "S": {
+    "label": "South",
+    "landmassSize": "medium"
+  },
+  "SE": {
+    "label": "Southeast",
+    "landmassSize": "large"
   }
 }

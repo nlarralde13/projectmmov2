@@ -1,4 +1,4 @@
-import { pickWeightedBiome } from './biomeUtils.js';
+import { pickWeightedBiome } from './utils/biomeUtils.js';
 
 // Internal counter for labeling blobs
 let blobCounter = 0;

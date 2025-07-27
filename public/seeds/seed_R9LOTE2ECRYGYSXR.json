@@ -520,6 +520,7 @@
           "land",
           "archipelago",
           "manual",
+          "ocean",
           "ocean"
         ],
         "resources": {},
@@ -1051,6 +1052,7 @@
           "land",
           "archipelago",
           "manual",
+          "ocean",
           "ocean"
         ],
         "resources": {},
@@ -1552,12 +1554,13 @@
         "y": 2,
         "region": "NE",
         "elevation": 0.6114527502255589,
-        "biome": "plains",
+        "biome": "water",
         "tags": [
           "mainland",
           "NW",
           "land",
-          "archipelago"
+          "archipelago",
+          "manual"
         ],
         "resources": {},
         "actions": [],
@@ -1573,12 +1576,13 @@
         "y": 2,
         "region": "NE",
         "elevation": 0.5787182287365324,
-        "biome": "plains",
+        "biome": "water",
         "tags": [
           "mainland",
           "NW",
           "land",
-          "archipelago"
+          "archipelago",
+          "manual"
         ],
         "resources": {},
         "actions": [],
@@ -13210,7 +13214,7 @@
       "tundra",
       "plains",
       "plains",
-      "plains",
+      "water",
       "water"
     ],
     [
@@ -13237,7 +13241,7 @@
       "taiga",
       "beach",
       "plains",
-      "plains",
+      "water",
       "water"
     ],
     [
@@ -13264,8 +13268,8 @@
       "tundra",
       "plains",
       "plains",
-      "plains",
-      "plains"
+      "water",
+      "water"
     ],
     [
       "taiga",

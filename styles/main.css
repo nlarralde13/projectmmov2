@@ -1,0 +1,43 @@
+#app-container {
+  display: flex;
+  gap: 1em;
+  align-items: flex-start;
+  padding: 1em;
+}
+
+#viewport {
+  width: 688px;
+  height: 688px;
+  background: #000;
+  border: 2px solid #444;
+  overflow: hidden;
+  position: relative;
+}
+
+#dev-panel {
+  width: 200px;
+  background: #1e1e1e;
+  color: #fff;
+  padding: 1em;
+  font-family: monospace;
+  border-left: 2px solid #555;
+}
+
+#dev-panel h3 {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+#dev-panel button {
+  width: 100%;
+  margin: 0.5em 0;
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 6px;
+  cursor: pointer;
+}
+
+#dev-panel button:hover {
+  background: #444;
+}

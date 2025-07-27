@@ -1,10 +1,11 @@
 import { loadSettings, getSettings } from './configLoader.js';
-import { loadRegionMap, generateWorld, generateChunks } from './worldEngine.js';
-import { renderMap, enableChunkHoverStatic, enableTileClickHandler } from './ui/renderMap.js';
-import { loadBiomeRules, getBiomeRules } from './biomeRulesLoader.js';
-import { floodFillConnectedWater } from './ui/floodFillConnectedWater.js';
+import { loadRegionMap, generateWorldFromRegionMap, saveWorldToJSON, loadWorldFromJSON, generateSeedID } from './worldEngine.js';
+import { renderMap } from './ui/renderMap.js';
+import { enableChunkHoverStatic, enableTileClickHandler } from './ui/mapEvents.js';
+import { loadBiomeRules } from './biomeRulesLoader.js';
+import { generateChunks } from './utils/chunkUtils.js';
 import { initializeContextMenu } from './ui/contextMenu.js';
-import { saveWorldToJSON, loadWorldFromJSON } from './worldLoader.js';
+import { floodFillConnectedWater } from './ui/floodFillConnectedWater.js';
 
 let world = null;
 let settings = null;
@@ -21,77 +22,129 @@ async function init() {
     tileSize = settings.tileSize || 10;
     devMode = isDevMode();
 
-    // Load seedID or default fallback
-    seedID = new URLSearchParams(window.location.search).get('seedID');
-    if (!seedID) {
-        seedID = 'R9LOTE2ECRYGYSXR';
-        const url = new URL(window.location);
-        url.searchParams.set('seedID', seedID);
-        window.history.replaceState({}, '', url);
-        console.log(`[Main] 🌱 No seedID provided. Using default: ${seedID}`);
-    } else {
-        console.log(`[Main] 🌱 Using seedID from URL: ${seedID}`);
-    }
+    const defaultSeedID = 'R9LOTE2ECRYGYSXR';
+    seedID = new URLSearchParams(window.location.search).get('seedID') || defaultSeedID;
+    let seedPath = `/seeds/seed_${seedID}.json`;
 
+    console.log(`[Main] 🌱 Attempting to load world with seedID: ${seedID}`);
     console.log(`[Main] 🚩 Current Mode: ${devMode ? 'DEV' : 'STANDARD'}`);
 
-    // Load saved world
-    const seedPath = `/seeds/seed_${seedID}.json`;
     world = await loadWorldFromJSON(seedPath);
 
+    // Fallback if loading fails
+    if (!world && seedID !== defaultSeedID) {
+        console.warn(`[Main] ⚠️ Failed to load world from seedID: ${seedID}. Falling back to default seed.`);
+
+        const url = new URL(window.location);
+        url.searchParams.set('seedID', defaultSeedID);
+        window.history.replaceState({}, '', url);
+
+        seedID = defaultSeedID;
+        seedPath = `/seeds/seed_${defaultSeedID}.json`;
+        world = await loadWorldFromJSON(seedPath);
+    }
+
     if (!world) {
-        console.error('[Main] ❌ Failed to load world.');
+        console.error('[Main] ❌ Failed to load any valid world. Aborting.');
         return;
     }
 
     floodFillConnectedWater(world.terrainMap);
-    console.log('[Main] ✅ World ready:', world);
 
+    createMainLayout();
     renderWorld();
-    createResetButton(() => location.reload());
-    createSaveButton(() => saveWorldToJSON(world, seedID));
+    createDevPanel(world, seedID);
 }
 
 function renderWorld() {
     const chunks = generateChunks(world.biomeMap, settings.gridChunkSize || 10);
-    const { canvas, ctx } = renderMap(world.biomeMap, settings, chunks, tileSize);
+    const { canvas, draw } = renderMap(world.biomeMap, settings, chunks, tileSize);
+    bindInteractions(canvas, world, chunks, draw);
+}
 
+function bindInteractions(canvas, worldData, chunks, draw) {
     canvas.dataset.tileSize = tileSize;
-    enableChunkHoverStatic(canvas, chunks, tileSize, world.biomeMap);
-    enableTileClickHandler(canvas, world.biomeMap, tileSize);
+
+    enableChunkHoverStatic(canvas, chunks, tileSize, worldData.biomeMap, draw);
+    enableTileClickHandler(canvas, worldData.biomeMap, tileSize);
 
     initializeContextMenu(
         canvas,
-        world.terrainMap,
-        (tile, biome) => {
-            if (devMode) {
-                tile.biome = biome;
-                world.biomeMap[tile.y][tile.x] = biome; // <--- ✅ Sync for render
-                console.log(`[Editor] ✅ Biome set to '${biome}' at (${tile.x}, ${tile.y})`);
-                renderWorld(); // Trigger full rerender
-    }
-},
+        worldData.terrainMap,
+        (tileInfo, biome) => {
+            const { x, y, tile } = tileInfo;
+            const map = worldData.biomeMap;
 
+            if (
+                devMode &&
+                typeof x === 'number' &&
+                typeof y === 'number' &&
+                y >= 0 && y < map.length &&
+                x >= 0 && x < map[0].length
+            ) {
+                tile.biome = biome;
+                map[y][x] = biome;
+                console.log(`[Editor] ✅ Biome set to '${biome}' at (${x}, ${y})`);
+                draw();
+            } else {
+                console.warn('[Editor] ⚠️ Invalid tile or coordinates:', tileInfo);
+            }
+        },
         devMode ? 'dev' : 'standard'
     );
 }
 
-function createResetButton(onClick) {
-    const btn = document.createElement('button');
-    btn.textContent = "Reset & Regenerate World";
-    btn.style.margin = "1em";
-    btn.onclick = onClick;
-    document.body.appendChild(btn);
-    console.log('[UI] ✅ Reset button created.');
+
+
+function createMainLayout() {
+    const container = document.createElement('div');
+    container.id = 'app-container';
+
+    const viewport = document.createElement('div');
+    viewport.id = 'viewport';
+
+    const devPanel = document.createElement('div');
+    devPanel.id = 'dev-panel';
+    devPanel.innerHTML = `<h3>🛠 Dev Tools</h3>`;
+
+    container.appendChild(viewport);
+    container.appendChild(devPanel);
+    document.body.appendChild(container);
 }
 
-function createSaveButton(onClick) {
-    const btn = document.createElement('button');
-    btn.textContent = "💾 Save World";
-    btn.style.margin = "1em";
-    btn.onclick = onClick;
-    document.body.appendChild(btn);
-    console.log('[UI] ✅ Save button created.');
+function createDevPanel(currentWorld, currentSeedID) {
+    if (!isDevMode()) return;
+
+    const panel = document.getElementById('dev-panel');
+    if (!panel) return;
+
+    const regenBtn = document.createElement('button');
+    regenBtn.textContent = '🌍 Generate New World';
+    regenBtn.onclick = async () => {
+        const confirmed = confirm("Are you sure?");
+        if (!confirmed) return;
+
+        const newSeedID = generateSeedID();
+        const newURL = `${window.location.origin}${window.location.pathname}?seedID=${newSeedID}&devMode=1`;
+        window.history.pushState({}, '', newURL);
+
+        const result = await generateWorldFromRegionMap(newSeedID);
+        if (!result) return;
+
+        world = result.world;
+        seedID = newSeedID;
+
+        bindInteractions(result.canvas, world, result.chunks, result.draw);
+    };
+
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = '💾 Save World';
+    saveBtn.onclick = () => {
+        saveWorldToJSON(currentWorld, currentSeedID);
+    };
+
+    panel.appendChild(regenBtn);
+    panel.appendChild(saveBtn);
 }
 
 function isDevMode() {

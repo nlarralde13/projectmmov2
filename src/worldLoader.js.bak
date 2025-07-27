@@ -58,7 +58,7 @@ export async function loadWorldFromJSON(url) {
     }
 }
 
-function generateSeedID(length = 16) {
+export function generateSeedID(length = 16) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let seed = '';
   for (let i = 0; i < length; i++) {

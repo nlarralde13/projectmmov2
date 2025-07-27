@@ -13,50 +13,55 @@ let currentMode = 'standard';
  * @param {Function} onBiomeChange - callback(tile, newBiome)
  * @param {string} mode - 'dev' or 'standard'
  */
-export function initializeContextMenu(canvas, terrainMap, onBiomeChange, mode = 'standard') {
-  terrainMapRef = terrainMap;
-  currentMode = mode; // <--- store mode for use in right-click handler
+export function initializeContextMenu(canvas, terrainMap, onTileSelected, mode = 'standard') {
+    canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
 
+        const tileSize = parseInt(canvas.dataset.tileSize) || 10;
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / tileSize);
+        const y = Math.floor((e.clientY - rect.top) / tileSize);
 
-  // Create the menu if not already created
-  if (!menuElement) {
-    menuElement = document.createElement('div');
-    menuElement.id = 'biomeContextMenu';
-    menuElement.style.position = 'absolute';
-    menuElement.style.display = 'none';
-    menuElement.style.background = '#222';
-    menuElement.style.color = '#fff';
-    menuElement.style.border = '1px solid #888';
-    menuElement.style.borderRadius = '4px';
-    menuElement.style.padding = '4px';
-    menuElement.style.zIndex = '1000';
-    document.body.appendChild(menuElement);
-  }
+        const tile = terrainMap[y]?.[x];
+        if (!tile) {
+            console.warn('[ContextMenu] ❌ No tile found at', x, y);
+            return;
+        }
 
-  // Hide menu on click anywhere
-  document.addEventListener('click', () => {
-    menuElement.style.display = 'none';
-  });
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.top = `${e.clientY}px`;
+        menu.style.left = `${e.clientX}px`;
+        menu.style.position = 'absolute';
+        menu.style.zIndex = 999;
+        menu.style.background = '#222';
+        menu.style.border = '1px solid #555';
+        menu.style.padding = '0.5em';
+        menu.style.color = '#fff';
 
-  // Attach right-click handler to canvas
-  canvas.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
+        const biomeOptions = ['forest', 'desert', 'tundra', 'water', 'plains'];
 
-    const rect = canvas.getBoundingClientRect();
-    const tileSize = canvas.dataset.tileSize ? parseInt(canvas.dataset.tileSize) : 10;
-    const x = Math.floor((e.clientX - rect.left) / tileSize);
-    const y = Math.floor((e.clientY - rect.top) / tileSize);
+        biomeOptions.forEach(biome => {
+            const item = document.createElement('div');
+            item.textContent = `Set Biome: ${biome}`;
+            item.style.cursor = 'pointer';
+            item.onclick = () => {
+                onTileSelected({ x, y, tile }, biome);
+                document.body.removeChild(menu);
+            };
+            menu.appendChild(item);
+        });
 
-    activeTile = getTileAt(x, y);
-    if (!activeTile) return;
+        document.body.appendChild(menu);
 
-    if (currentMode === 'dev') {
-      showDevMenu(e.clientX, e.clientY, onBiomeChange);
-    } else {
-      showUserMenu(e.clientX, e.clientY);
-    }
-  });
+        document.addEventListener('click', () => {
+            if (document.body.contains(menu)) {
+                document.body.removeChild(menu);
+            }
+        }, { once: true });
+    });
 }
+
 
 // 🛠 Dev Mode: Show biome editing menu
 function showDevMenu(x, y, onBiomeChange) {
