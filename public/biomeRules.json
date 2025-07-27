@@ -1,0 +1,83 @@
+{
+  "NW": {
+    "biomeWeights": {
+      "tundra": 0.6,
+      "mountain": 0.3,
+      "taiga": 0.1
+    },
+    "waterRatio": 0.4,
+    "elevationRange": [0.4, 0.95]
+  },
+  "N": {
+    "biomeWeights": {
+      "taiga": 0.4,
+      "plains": 0.3,
+      "mountain": 0.3
+    },
+    "waterRatio": 0.35,
+    "elevationRange": [0.3, 0.9]
+  },
+  "NE": {
+    "biomeWeights": {
+      "mountain": 0.4,
+      "taiga": 0.3,
+      "tundra": 0.3
+    },
+    "waterRatio": 0.3,
+    "elevationRange": [0.4, 0.9]
+  },
+  "W": {
+    "biomeWeights": {
+      "plains": 0.5,
+      "forest": 0.3,
+      "hills": 0.2
+    },
+    "waterRatio": 0.25,
+    "elevationRange": [0.2, 0.7]
+  },
+  "C": {
+    "biomeWeights": {
+      "plains": 0.4,
+      "desert": 0.3,
+      "savanna": 0.3
+    },
+    "waterRatio": 0.1,
+    "elevationRange": [0.1, 0.6]
+  },
+  "E": {
+    "biomeWeights": {
+      "hills": 0.3,
+      "forest": 0.4,
+      "plains": 0.3
+    },
+    "waterRatio": 0.2,
+    "elevationRange": [0.2, 0.7]
+  },
+  "SW": {
+    "biomeWeights": {
+      "tropical": 0.5,
+      "jungle": 0.3,
+      "swamp": 0.2
+    },
+    "waterRatio": 0.5,
+    "elevationRange": [0.1, 0.6]
+  },
+  "S": {
+    "biomeWeights": {
+      "swamp": 0.3,
+      "tropical": 0.4,
+      "plains": 0.3
+    },
+    "waterRatio": 0.35,
+    "elevationRange": [0.2, 0.6]
+  },
+  "SE": {
+    "biomeWeights": {
+      "jungle": 0.4,
+      "tropical": 0.3,
+      "volcanic": 0.3
+    },
+    "waterRatio": 0.6,
+    "elevationRange": [0.1, 0.8]
+  }
+}

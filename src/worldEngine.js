@@ -1,5 +1,8 @@
 import Ajv from 'ajv';
 import schema from './regionMap.schema.json';
+import { getRegionName } from './ui/renderMap.js';
+import { pickWeightedBiome } from './biomeUtils.js';
+import { addLandmassBlob } from './landmassUtils.js';
 
 let regionMapData = {};
 let validationErrors = [];
@@ -7,7 +10,7 @@ let validationErrors = [];
 const ajv = new Ajv();
 
 /**
- * Loads regionMap.json from public directory.
+ * Loads regionMap.json from public directory with cache buster
  */
 export async function loadRegionMap() {
     try {
@@ -22,7 +25,7 @@ export async function loadRegionMap() {
 }
 
 /**
- * Uses AJV to validate regionMap.json against schema.
+ * Validates the region map file using AJV and the provided schema.
  */
 export function validateRegionMap() {
     const validate = ajv.compile(schema);
@@ -37,33 +40,107 @@ export function validateRegionMap() {
 }
 
 /**
- * Same generator logic as before
+ * Generates a world using per-region biome rules and landmass blob logic.
+ *
+ * @param {Object} biomeRules - parsed biome rules per 3x3 region
+ * @returns {{terrainMap, biomeMap, heightMap, meta}}
  */
-export function generateWorld() {
+export function generateWorld(biomeRules = {}) {
     if (!validateRegionMap()) {
         console.error('[WorldEngine] ❌ Cannot generate world: invalid config.');
         return null;
     }
 
-    const { width, height } = regionMapData.dimensions;
-    const heightMap = Array.from({ length: height }, () =>
-        Array.from({ length: width }, () => Math.random())
-    );
-    const biomeMap = heightMap.map(row =>
-        row.map(h => (h > 0.5 ? 'grassland' : 'water'))
-    );
+    if (!regionMapData || !regionMapData.dimensions) {
+        console.error('[WorldEngine] ❌ regionMapData is missing or incomplete.');
+        return null;
+    }
 
-    console.log('[WorldEngine] 🌍 Generated heightMap + biomeMap.');
-    return { heightMap, biomeMap, meta: regionMapData };
+    const { width, height } = regionMapData.dimensions;
+
+    const terrainMap = [];
+    const biomeMap = [];
+    const heightMap = [];
+
+    // 🌊 Step 1: Start with all tiles as water
+    for (let y = 0; y < height; y++) {
+        terrainMap[y] = [];
+        biomeMap[y] = [];
+        heightMap[y] = [];
+
+        for (let x = 0; x < width; x++) {
+            const region = getRegionName(x, y, width, height);
+            const tile = {
+                x,
+                y,
+                region,
+                elevation: 0,
+                biome: 'water',
+                tags: [],
+                resources: {},
+                actions: []
+            };
+            terrainMap[y][x] = tile;
+            biomeMap[y][x] = 'water';
+            heightMap[y][x] = 0;
+        }
+    }
+
+    console.log('[WorldEngine] 🌊 Initialized map as ocean');
+
+    // 🗺️ Step 2: Region-configurable landmass blob generation
+    const regionLandmassConfig = {
+        NW: { count: 10, radius: 10 },
+        N:  { count: 3, radius: 12 },
+        NE: { count: 2, radius: 10 },
+        W:  { count: 3, radius: 12 },
+        C:  { count: 1, radius: 50 },
+        E:  { count: 3, radius: 12 },
+        SW: { count: 2, radius: 10 },
+        S:  { count: 3, radius: 12 },
+        SE: { count: 2, radius: 10 }
+    };
+
+    for (const [regionKey, config] of Object.entries(regionLandmassConfig)) {
+        const rule = biomeRules[regionKey];
+        if (!rule) continue;
+
+        for (let i = 0; i < config.count; i++) {
+            const tries = 25;
+            let placed = false;
+
+            for (let attempt = 0; attempt < tries && !placed; attempt++) {
+                const cx = Math.floor(Math.random() * width);
+                const cy = Math.floor(Math.random() * height);
+                if (getRegionName(cx, cy, width, height) === regionKey) {
+                    addLandmassBlob(terrainMap, cx, cy, config.radius, rule.biomeWeights, ['mainland']);
+                    placed = true;
+                }
+            }
+        }
+    }
+
+    console.log('[WorldEngine] 🏝️ Landmass generation complete.');
+
+    // 🗺️ Step 3: Update biomeMap and elevationMap from terrainMap
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const tile = terrainMap[y][x];
+            biomeMap[y][x] = tile.biome;
+            heightMap[y][x] = tile.elevation;
+        }
+    }
+
+    return {
+        terrainMap,
+        biomeMap,
+        heightMap,
+        meta: regionMapData
+    };
 }
 
-
 /**
- * Generates logical chunk metadata from your biomeMap.
- * Returns an array of chunks, each with id and bounds.
- *
- * @param {Array<Array<string>>} biomeMap - your generated 2D map
- * @param {number} chunkSize - how many tiles wide/tall per chunk
+ * Generates logical chunk metadata from biomeMap.
  */
 export function generateChunks(biomeMap, chunkSize = 100) {
     const height = biomeMap.length;

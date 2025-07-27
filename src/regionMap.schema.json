@@ -3,18 +3,35 @@
   "type": "object",
   "required": ["seed", "dimensions"],
   "properties": {
-    "seed": { "type": "string" },
+    "seed": {
+      "type": "string"
+    },
     "dimensions": {
       "type": "object",
       "required": ["width", "height"],
       "properties": {
-        "width": { "type": "integer", "minimum": 1 },
-        "height": { "type": "integer", "minimum": 1 }
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "regions": {
       "type": "array",
-      "items": { "type": "object" }
+      "items": {
+        "type": "object"
+      }
+    },
+    "worldName": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
     }
-  }
+  },
+  "additionalProperties": false
 }

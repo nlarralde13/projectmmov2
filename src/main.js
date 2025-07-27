@@ -1,33 +1,39 @@
 import { loadSettings, getSettings } from './configLoader.js';
 import { loadRegionMap, generateWorld, generateChunks } from './worldEngine.js';
 import { renderMap, enableChunkHoverStatic, enableTileClickHandler } from './ui/renderMap.js';
+import { loadBiomeRules, getBiomeRules } from './biomeRulesLoader.js';
+import { floodFillConnectedWater } from './ui/floodFillConnectedWater.js';
+
 
 
 async function init() {
-    // Load global settings from settings.json
+    // Load config and rules
     await loadSettings();
-    const settings = getSettings();
-    console.log('[Main] ✅ Settings loaded:', settings);
-
-    // Load & validate your regionMap.json for map generation
+    await loadBiomeRules();
     await loadRegionMap();
-    const world = generateWorld();
+
+    const settings = getSettings();
+    const biomeRules = getBiomeRules();
+
+    // Generate world now that regionMap is loaded
+    const world = generateWorld(biomeRules);
 
     if (world) {
+        floodFillConnectedWater(world.terrainMap);
         console.log('[Main] ✅ World generated:', world);
 
         const tileSize = settings.tileSize || 10;
         const chunks = generateChunks(world.biomeMap, settings.gridChunkSize || 10);
 
         const { canvas, ctx } = renderMap(world.biomeMap, settings, chunks, tileSize);
-        enableChunkHoverStatic(canvas, chunks, tileSize);
+        enableChunkHoverStatic(canvas, chunks, tileSize, world.biomeMap);
         enableTileClickHandler(canvas, world.biomeMap, tileSize);
 
         createResetButton(() => {
-            const newWorld = generateWorld();
+            const newWorld = generateWorld(biomeRules);
             const newChunks = generateChunks(newWorld.biomeMap, settings.gridChunkSize || 10);
             const result = renderMap(newWorld.biomeMap, settings, newChunks, tileSize);
-            enableChunkHoverStatic(result.canvas, newChunks, tileSize);
+            enableChunkHoverStatic(result.canvas, newChunks, tileSize, newWorld.biomeMap);
             enableTileClickHandler(result.canvas, newWorld.biomeMap, tileSize);
         });
 
@@ -35,6 +41,7 @@ async function init() {
         console.error('[Main] ❌ Failed to generate world.');
     }
 }
+
 
 init();
 
@@ -52,4 +59,8 @@ function createResetButton(onClick) {
     btn.onclick = onClick;
     document.body.appendChild(btn);
     console.log('[UI] ✅ Reset button created.');
+}
+
+function isDevMode() {
+    return new URLSearchParams(window.location.search).get('devMode') === '1';
 }
