@@ -1,0 +1,46 @@
+📦 Browser loads index.html
+        ↓
+🧠 main.js → init()
+        ↓
+────────────────────────────────────────────
+  🔹 loadSettings()             (configLoader.js)
+  🔹 getSettings()
+
+  🔹 loadBiomeRules()          (biomeRulesLoader.js)
+  🔹 loadRegionMap()           (worldEngine.js)
+        ↓
+  🔹 createMainLayout()
+        ↓
+  🔍 Attempt to load seed from /seeds/seed_<id>.json
+     └─ loadWorldFromJSON()    (worldEngine.js)
+        ↓
+  🧪 If load fails:
+     └─ generateSeedID()
+     └─ generateWorldFromRegionMap()
+        └─ generateWorld()     (worldEngine.js)
+        └─ renderMap()         (renderMap.js)
+            └─ draw()
+               ├─ getCameraPosition()        (camera.js)
+               ├─ getBiomeColor()            (colorUtils.js)
+               └─ drawDevOverlay()           (mapOverlay.js)
+                    ├─ showTileGrid
+                    ├─ showRegionBorders
+                    └─ Region labels
+        ↓
+✅ SeedID displayed (devUI.js)
+        ↓
+✅ renderWorld()
+   ├─ getVisibleTileBounds()   (chunkUtils.js)
+   ├─ renderMap(...)
+   └─ bindInteractions()       (mapEvents.js)
+        └─ initializeContextMenu()
+        └─ hover events
+        └─ dev mode tile editing
+────────────────────────────────────────────
+        ↓
+🛠 Dev tools initialized (devTools.js)
+   ├─ Regenerate map button
+   ├─ Save world
+   ├─ Toggle: showTileGrid
+   ├─ Toggle: showRegionBorders
+   └─ on change → re-renders world via callback

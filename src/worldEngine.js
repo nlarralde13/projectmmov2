@@ -4,10 +4,9 @@ import { renderMap } from './ui/renderMap.js';
 
 import Ajv from 'ajv';
 
-// Stub: Replace this with actual biome/world generation
 function generateWorld(regionMap, settings, seedID) {
-    const width = settings.worldWidth || 25;
-    const height = settings.worldHeight || 25;
+    const width = parseInt(settings.worldWidth) || 100;
+    const height = parseInt(settings.worldHeight) || 100;
 
     const biomeMap = Array.from({ length: height }, () =>
         Array.from({ length: width }, () => 'water')
@@ -22,6 +21,8 @@ function generateWorld(regionMap, settings, seedID) {
         }))
     );
 
+    console.log(`[WorldEngine] 🌍 Generated ${width}x${height} world filled with water.`);
+
     return {
         seedID,
         biomeMap,
@@ -30,6 +31,7 @@ function generateWorld(regionMap, settings, seedID) {
         generatedAt: new Date().toISOString()
     };
 }
+
 
 // Validate and load regionMap.json
 export async function loadRegionMap() {

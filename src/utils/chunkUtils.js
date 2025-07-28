@@ -26,3 +26,24 @@ export function generateChunks(biomeMap, chunkSize = 100) {
     console.log(`[ChunkUtils] ✅ Generated ${chunks.length} chunks.`);
     return chunks;
 }
+
+
+/**
+ * Calculates how many tiles can fit on screen, clamped to a max value.
+ *
+ * @param {number} tileSize - The size of each tile in pixels.
+ * @param {number} maxTiles - Max number of tiles to show per dimension (default 40).
+ * @returns {{ visibleCols: number, visibleRows: number }}
+ */
+export function getVisibleTileBounds(tileSize, maxTiles = 40) {
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  const maxWidthTiles = Math.floor(windowWidth / tileSize);
+  const maxHeightTiles = Math.floor(windowHeight / tileSize);
+
+  return {
+    visibleCols: Math.min(maxTiles, maxWidthTiles),
+    visibleRows: Math.min(maxTiles, maxHeightTiles)
+  };
+}

@@ -1,5 +1,13 @@
 {
-  "showGrid": true,
-  "gridChunkSize": 1,
-  "tileSize": 32
+  "worldWidth": 45,
+  "worldHeight": 45,
+  "tileSize": 32,
+  "gridChunkSize": 10,
+  "defaultSeedID": "R9LOTE2ECRYGYSXR",
+
+  "enableDevMode": true,
+  "showTileGrid": true,
+  "showRegionBorders": true,
+
+  "startingRegion": "center"
 }
