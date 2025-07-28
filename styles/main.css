@@ -21,6 +21,7 @@
 }
 
 #dev-panel {
+  display: none; /* Hidden by default */
   background: #1a1a1a;
   color: #fff;
   padding: 16px;
