@@ -8,6 +8,6 @@
   "enableDevMode": true,
   "showTileGrid": true,
   "showRegionBorders": true,
-
+  "cameraControl":true,
   "startingRegion": "center"
 }

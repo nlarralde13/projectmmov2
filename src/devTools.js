@@ -10,6 +10,7 @@ export function initializeDevTools(currentWorld, currentSeedID, onWorldUpdated) 
 
   const settings = getSettings();
   panel.innerHTML = '<h3>🛠 Dev Tools</h3>';
+  panel.appendChild(createToggle('📷 Enable Camera Control', 'cameraControl'));
 
   // ✅ Toggle builder
   function createToggle(labelText, settingKey) {
@@ -27,17 +28,11 @@ export function initializeDevTools(currentWorld, currentSeedID, onWorldUpdated) 
       console.log(`[DevPanel] ⚙️ ${settingKey} = ${checkbox.checked}`);
       onWorldUpdated(currentWorld, currentSeedID);
     };
-
-    checkbox.onchange = () => {
-    settings[settingKey] = checkbox.checked;
-    console.log(`[DevPanel] ${settingKey} = ${checkbox.checked}`);
-    onWorldUpdated(currentWorld, currentSeedID); // ✅ triggers rerender
-    };
-
-
+   
     label.appendChild(checkbox);
     label.appendChild(document.createTextNode(labelText));
-    return label;
+    return label;;
+
   }
 
   // 🌍 Regenerate button

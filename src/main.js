@@ -19,6 +19,7 @@ import { displaySeedID } from './ui/devUI.js';
 
 
 
+
 let world = null;
 let seedID = null;
 let tileSize = 16;
@@ -176,5 +177,42 @@ window.addEventListener('resize', () => {
     }
   }, 150);
 });
+
+import { moveCamera } from './ui/camera.js';
+
+window.addEventListener('keydown', (e) => {
+  const settings = getSettings();
+  if (!settings.cameraControl) return;
+
+  let moved = false;
+
+  switch (e.key) {
+    case 'ArrowUp':
+    case 'w':
+      moveCamera(0, -1);
+      moved = true;
+      break;
+    case 'ArrowDown':
+    case 's':
+      moveCamera(0, 1);
+      moved = true;
+      break;
+    case 'ArrowLeft':
+    case 'a':
+      moveCamera(-1, 0);
+      moved = true;
+      break;
+    case 'ArrowRight':
+    case 'd':
+      moveCamera(1, 0);
+      moved = true;
+      break;
+  }
+
+  if (moved && world) {
+    renderWorld(world, settings);
+  }
+});
+
 
 
