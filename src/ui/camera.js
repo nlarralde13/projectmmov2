@@ -1,48 +1,30 @@
-/**
- * camera.js
- * Controls map viewport offset and movement logic.
- */
+import { getSettings } from '../configLoader.js';
 
-let camera = {
-  x: 0,
-  y: 0
-};
+let camera = { x: 0, y: 0 };
 
-/**
- * Centers the camera on a specific tile.
- * @param {number} targetX - Tile X to center on
- * @param {number} targetY - Tile Y to center on
- * @param {number} visibleCols - How many tiles fit horizontally
- * @param {number} visibleRows - How many tiles fit vertically
- */
+export function moveCamera(dx, dy, mapWidth = 100, mapHeight = 100) {
+  const settings = getSettings();
+  const { visibleCols, visibleRows } = settings;
+
+  const maxX = mapWidth - visibleCols;
+  const maxY = mapHeight - visibleRows;
+
+  camera.x = Math.max(0, Math.min(camera.x + dx, maxX));
+  camera.y = Math.max(0, Math.min(camera.y + dy, maxY));
+
+  console.log(`[Camera] Moved to (${camera.x}, ${camera.y})`);
+}
+
 export function centerCameraOnTile(targetX, targetY, visibleCols, visibleRows) {
   camera.x = targetX - Math.floor(visibleCols / 2);
   camera.y = targetY - Math.floor(visibleRows / 2);
-  console.log(`[Camera] 🎯 Centered at (${camera.x}, ${camera.y})`);
+  console.log(`[Camera] Centered on tile (${targetX}, ${targetY})`);
 }
 
-/**
- * Move the camera (god mode dev only).
- * @param {number} dx - Change in tiles (horizontal)
- * @param {number} dy - Change in tiles (vertical)
- */
-export function moveCamera(dx, dy) {
-  camera.x += dx;
-  camera.y += dy;
-  console.log(`[Camera] 🕹️ Moved to (${camera.x}, ${camera.y})`);
-}
-
-/**
- * Get current camera position (top-left visible tile)
- * @returns {{ x: number, y: number }}
- */
 export function getCameraPosition() {
   return { ...camera };
 }
 
-/**
- * Reset camera to top-left (optional helper)
- */
 export function resetCamera() {
   camera.x = 0;
   camera.y = 0;

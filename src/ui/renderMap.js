@@ -1,74 +1,45 @@
-import { getBiomeColor } from './colorUtils.js';
-import { drawDevOverlay } from './mapOverlay.js';
 import { getCameraPosition } from './camera.js';
-
+import { drawDevOverlay } from './mapOverlay.js';
+import { getBiomeColor } from './colorUtils.js';
 
 /**
- * Renders a portion of the biome map inside #viewport.
- *
- * @param {Array<Array<string>>} biomeMap - The world’s biome grid
- * @param {Object} settings - Global config settings
- * @param {Array<Object>} chunks - Optional chunk data
- * @param {number} tileSize - Size of each tile in pixels
- * @param {number} visibleCols - How many columns (tiles) to draw
- * @param {number} visibleRows - How many rows (tiles) to draw
- * @returns {Object} { canvas, ctx, draw }
+ * Render a tile-based map to a canvas and insert it into #viewport.
  */
-function renderMap(biomeMap, settings = {}, chunks = [], tileSize = 16, visibleCols = 40, visibleRows = 40) {
-  const viewport = document.getElementById('viewport');
-  if (!viewport) {
-    console.error('[renderMap] ❌ Missing #viewport container.');
-    return;
+export function renderMap(biomeMap, settings, tileSize, visibleCols, visibleRows) {
+  const target = document.getElementById('viewport');
+  if (!target) {
+    console.error('[RenderMap] ❌ #viewport not found.');
+    return null;
   }
 
   const canvas = document.createElement('canvas');
+  canvas.id = 'game-canvas';
   canvas.width = visibleCols * tileSize;
   canvas.height = visibleRows * tileSize;
-  canvas.dataset.tileSize = tileSize;
-
-  viewport.innerHTML = ''; // Clear old canvas
-  viewport.appendChild(canvas);
-
   const ctx = canvas.getContext('2d');
 
-
-  /**
- * draw()
- * Renders a portion of the world map to the canvas, based on the current camera position.
- * - Uses camera.x and camera.y as the top-left visible tile (viewport origin).
- * - Loops through visibleCols × visibleRows tiles starting from the camera offset.
- * - Each tile is rendered using getBiomeColor() and drawn at screen-relative coordinates.
- * - Optionally draws dev overlays (tile grid, region borders, labels) if devMode is enabled.
- */
-
   function draw() {
-  const { x: camX, y: camY } = getCameraPosition();
+    const { x: camX, y: camY } = getCameraPosition();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let screenY = 0; screenY < visibleRows; screenY++) {
-    for (let screenX = 0; screenX < visibleCols; screenX++) {
-      const worldX = camX + screenX;
-      const worldY = camY + screenY;
+    for (let screenY = 0; screenY < visibleRows; screenY++) {
+      for (let screenX = 0; screenX < visibleCols; screenX++) {
+        const worldX = camX + screenX;
+        const worldY = camY + screenY;
+        const tile = biomeMap[worldY]?.[worldX];
+        if (!tile) continue;
 
-      const biome = biomeMap[worldY]?.[worldX] || 'void';
+        ctx.fillStyle = getBiomeColor(tile.type);
+        ctx.fillRect(screenX * tileSize, screenY * tileSize, tileSize, tileSize);
+      }
+    }
 
-      ctx.fillStyle = getBiomeColor(biome);
-      ctx.fillRect(screenX * tileSize, screenY * tileSize, tileSize, tileSize);
+    if (settings.enableDevMode && (settings.showTileGrid || settings.showRegionBorders)) {
+      drawDevOverlay(ctx, biomeMap, tileSize, settings);
     }
   }
 
-  if (settings.enableDevMode && (settings.showTileGrid || settings.showRegionBorders)) {
-  drawDevOverlay(ctx, biomeMap, tileSize, settings);
-}
-
-}
-
-
-  console.log(`[Render] 🎯 ${visibleCols}x${visibleRows} tiles → ${canvas.width}x${canvas.height}px`);
   draw();
-
-  return { canvas, ctx, draw };
+  target.appendChild(canvas);
+  return { canvas, draw };
 }
-
-export {
-  renderMap
-};
