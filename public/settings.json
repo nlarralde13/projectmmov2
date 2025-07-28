@@ -1,5 +1,14 @@
 {
-  "showGrid": true,
-  "gridChunkSize": 1,
-  "tileSize": 32
+  "worldWidth": 250,
+  "worldHeight": 250,
+  "tileSize": 16,
+  "gridChunkSize": 10,
+  "biomeCount": 12,
+  "resourceNodeCount": 150,
+
+  "devOptions": {
+    "showGrid": true,
+    "showRegions": false,
+    "enableOverlay": false
+  }
 }

@@ -1,62 +1,48 @@
-#app-container {
+#ui-panel {
+  width: 100%;
+  background-color: #111;
+  color: white;
+  padding: 12px 20px;
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: 2px solid #333;
+}
+
+#main-layout {
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 20px;
-  min-height: 100vh;
-  box-sizing: border-box;
-  flex-wrap: wrap; /* allow wrapping for narrow screens */
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+#character-panel {
+  width: 200px;
+  background-color: #222;
+  color: white;
+  padding: 16px;
+  border-right: 2px solid #333;
+}
+
+#viewport-container {
+  width: 640px; /* 40 tiles * 16px */
+  height: 640px;
+  overflow: scroll;
+  background-color: #eee;
+  border: 2px solid #ccc;
 }
 
 #viewport {
-  background: #111;
-  border: 2px solid #444;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow: auto;
-  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
 }
 
 #dev-panel {
-  display: none; /* Hidden by default */
+  width: 250px;
   background: #1a1a1a;
   color: #fff;
   padding: 16px;
   border-left: 2px solid #333;
-  min-width: 200px;
-  max-width: 300px;
-  width: 100%;
-  flex: 1;
-}
-@media (max-width: 768px) {
-  #app-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  #dev-panel {
-    border-left: none;
-    border-top: 2px solid #333;
-    margin-top: 10px;
-    width: 100%;
-    max-width: 100%;
-  }
-}
-@media (max-width: 480px) {
-  #app-container {
-    padding: 10px;
-    gap: 10px;
-  }
-
-  #viewport {
-    max-width: 100%;
-    max-height: 70vh;
-  }
-
-  #dev-panel {
-    padding: 12px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 }

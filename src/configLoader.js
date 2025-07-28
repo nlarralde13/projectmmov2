@@ -1,41 +1,35 @@
 // configLoader.js
-// --------------------------------------------------
-// This module loads your settings.json on page load,
-// merges it with sensible defaults, logs everything nicely,
-// and exposes getSettings() so the rest of your app can use it.
+// Manages global game settings loaded from settings.json
 
-let settings = {};  // Holds the loaded config object
+let settings = {};
 
 /**
- * Loads settings.json from the public directory with a cache buster,
- * then parses it as JSON and logs a nice summary.
+ * Loads settings.json from public folder with cache-busting.
  */
 export async function loadSettings() {
-    try {
-        const response = await fetch(`/settings.json?nocache=${Date.now()}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error ${response.status}`);
-        }
-
-        // Parse the JSON
-        settings = await response.json();
-
-        // Log the loaded settings as a nice table
-        console.log('[ConfigLoader] ✅ Loaded settings:');
-        console.table(settings);
-
-    } catch (err) {
-        console.error('[ConfigLoader] ❌ Failed to load settings.json:', err);
-
-        // Fallback to empty object to avoid crashes elsewhere
-        settings = {};
-    }
+  try {
+    const response = await fetch(`/settings.json?nocache=${Date.now()}`);
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    settings = await response.json();
+    console.log('[ConfigLoader] ✅ Loaded settings:');
+    console.table(settings);
+  } catch (err) {
+    console.error('[ConfigLoader] ❌ Failed to load settings.json:', err);
+    settings = {};
+  }
 }
 
 /**
- * Returns the currently loaded settings object.
- * Use this everywhere in your app to access config.
+ * Returns current global settings object.
  */
 export function getSettings() {
-    return settings;
+  return settings;
+}
+
+/**
+ * Overwrites global settings reference with a new object.
+ * Useful for reactive updates across modules.
+ */
+export function setSettings(newSettings) {
+  settings = newSettings;
 }

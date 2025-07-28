@@ -1,87 +1,78 @@
+// /src/ui/mapOverlay.js
+
 import { getRegionName } from '../utils/regionUtils.js';
+import { regionColors, tileGrid } from './colors.js';
 
 /**
- * Draws red grid lines around each chunk.
+ * Draws a fine grid overlay on each tile.
+ * Used to visually separate tiles during development.
  */
-export function drawChunkGridOverlay(ctx, chunks, tileSize) {
-    ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-    ctx.lineWidth = 1;
-    ctx.fillStyle = 'black';
-    ctx.font = `${tileSize}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+export function drawTileGridOverlay(ctx, biomeMap, tileSize) {
+  const width = biomeMap[0].length;
+  const height = biomeMap.length;
 
-    chunks.forEach(chunk => {
-        const { startX, startY, endX, endY } = chunk.bounds;
+  ctx.strokeStyle = tileGrid.border;
+  ctx.lineWidth = 0.5;
 
-        ctx.strokeRect(
-            startX * tileSize,
-            startY * tileSize,
-            (endX - startX + 1) * tileSize,
-            (endY - startY + 1) * tileSize
-        );
-    });
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+    }
+  }
 
-    console.log(`[MapOverlay] 🔍 Drew grid overlay for ${chunks.length} chunks.`);
+  console.log('[MapOverlay] 🔲 Tile grid overlay drawn.');
 }
 
 /**
- * Draws dev-mode overlays: region borders, tile outlines, region labels.
+ * Draws major region borders and region name labels.
+ * Divides the map into a 3x3 grid: NW, N, NE, etc.
  */
 export function drawDevOverlay(ctx, biomeMap, tileSize) {
-    const width = biomeMap[0].length;
-    const height = biomeMap.length;
-    const thirdWidth = width / 3;
-    const thirdHeight = height / 3;
+  const width = biomeMap[0].length;
+  const height = biomeMap.length;
+  const thirdWidth = width / 3;
+  const thirdHeight = height / 3;
 
-    // Draw region grid (blue lines)
-    ctx.strokeStyle = 'rgba(0, 0, 255, 0.75)';
-    ctx.lineWidth = 2;
+  // Draw vertical and horizontal lines to separate regions
+  ctx.strokeStyle = regionColors.border;
+  ctx.lineWidth = 2;
 
-    for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * thirdWidth * tileSize, 0);
-        ctx.lineTo(i * thirdWidth * tileSize, height * tileSize);
-        ctx.stroke();
+  for (let i = 1; i < 3; i++) {
+    // Vertical lines
+    ctx.beginPath();
+    ctx.moveTo(i * thirdWidth * tileSize, 0);
+    ctx.lineTo(i * thirdWidth * tileSize, height * tileSize);
+    ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(0, i * thirdHeight * tileSize);
-        ctx.lineTo(width * tileSize, i * thirdHeight * tileSize);
-        ctx.stroke();
+    // Horizontal lines
+    ctx.beginPath();
+    ctx.moveTo(0, i * thirdHeight * tileSize);
+    ctx.lineTo(width * tileSize, i * thirdHeight * tileSize);
+    ctx.stroke();
+  }
+
+  // Draw region labels (e.g., NW, C, SE)
+  ctx.fillStyle = regionColors.label;
+  ctx.font = `${tileSize}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const offsetX = thirdWidth / 2;
+  const offsetY = thirdHeight / 2;
+
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      const labelX = Math.floor((col * thirdWidth + offsetX) * tileSize);
+      const labelY = Math.floor((row * thirdHeight + offsetY) * tileSize);
+      const regionLabel = getRegionName(
+        col * thirdWidth,
+        row * thirdHeight,
+        width,
+        height
+      );
+      ctx.fillText(regionLabel, labelX, labelY);
     }
+  }
 
-    // Tile border overlays (light red)
-    ctx.strokeStyle = 'rgba(255, 0, 0, 0.3)';
-    ctx.lineWidth = 0.5;
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
-        }
-    }
-
-    // Region labels (centered in each 3x3 zone)
-    ctx.fillStyle = 'blue';
-    ctx.font = `${tileSize}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    const offsetX = thirdWidth / 2;
-    const offsetY = thirdHeight / 2;
-
-    for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 3; col++) {
-            const labelX = Math.floor((col * thirdWidth + offsetX) * tileSize);
-            const labelY = Math.floor((row * thirdHeight + offsetY) * tileSize);
-            const regionLabel = getRegionName(
-                col * thirdWidth,
-                row * thirdHeight,
-                width,
-                height
-            );
-            ctx.fillText(regionLabel, labelX, labelY);
-        }
-    }
-
-    console.log('[MapOverlay] 🧪 Dev overlay drawn.');
+  console.log('[MapOverlay] 🧭 Region grid overlay drawn.');
 }
