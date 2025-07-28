@@ -1,6 +1,6 @@
 {
-  "worldWidth": 250,
-  "worldHeight": 250,
+  "worldWidth": 50,
+  "worldHeight": 50,
   "tileSize": 16,
   "gridChunkSize": 10,
   "biomeCount": 12,
@@ -8,7 +8,7 @@
 
   "devOptions": {
     "showGrid": true,
-    "showRegions": false,
+    "showRegions": true,
     "enableOverlay": false
   }
 }

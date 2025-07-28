@@ -1,12 +1,20 @@
+// UI + Layout
 import { initLayout } from './layout.js';
-import { loadSettings, getSettings } from './configLoader.js';
-import { loadWorldFromSeed, generateWorldFromRegionMap } from './worldEngine.js';
-import { renderMap } from './ui/renderMap.js';
 import { createDevPanel } from './devTools.js';
+
+// Config
+import { loadSettings, getSettings } from './configLoader.js';
+
+// World Generation
+import { generateEmptyWorld } from './worldEngine.js'; // ✅ manual map creation
+import { generateChunks } from './utils/chunkUtils.js';
+
+// Rendering + UI Hooks
+import { renderMap } from './ui/renderMap.js';
 import { enableHoverTooltip } from './ui/toolTips.js';
 import { initKeyboardControls } from './ui/input.js';
 
-
+// Global state
 let currentWorld = null;
 let currentSeedID = null;
 let drawFn = null;
@@ -15,10 +23,12 @@ let drawFn = null;
  * Initializes layout, settings, world state, and UI hooks
  */
 async function init() {
-  initLayout(); // Build UI structure
+  initLayout(); // Setup UI panels
+
   await loadSettings();
   const settings = getSettings();
 
+  // Query params
   const params = new URLSearchParams(window.location.search);
   const devMode = params.get('devMode') === '1';
   const seedID = params.get('seedID') || 'R9LOTE2ECRYGYSXR';
@@ -27,36 +37,33 @@ async function init() {
   console.log(`[Main] 🌍 Loading seed: ${seedID}`);
   console.log(`[Main] 🔧 Mode: ${devMode ? 'DEV' : 'STANDARD'}`);
 
-  const devPanel = document.getElementById('dev-panel');
-  const devHeader = document.createElement('h3');
+  // Generate new world manually
+  const { worldWidth, worldHeight } = settings;
+  const biomeMap = Array.from({ length: worldHeight }, () =>
+    Array.from({ length: worldWidth }, () => ({
+      biome: 'water',
+      elevation: 0,
+      region: null,
+      tags: []
+    }))
+  );
 
+  generateEmptyWorld(biomeMap, settings); // could just be a wrapper
+  const chunks = generateChunks(biomeMap);
+  currentWorld = { biomeMap, chunks };
+
+  // Initialize dev panel only after world is ready
   if (devMode) {
-    devPanel.style.display = 'flex';
-    devHeader.innerHTML = '🛠 Dev Tools';
-    devPanel.appendChild(devHeader);
     createDevPanel(currentWorld, currentSeedID, handleWorldUpdate);
-  } else {
-    devPanel.style.display = 'flex';
-    devHeader.innerHTML = '🎮 User Tools';
-    devPanel.appendChild(devHeader);
   }
 
+  // Kick off initial render
+  handleWorldUpdate(currentWorld);
 
-  const result = await loadWorldFromSeed(seedID);
-  if (!result) {
-    console.warn('[Main] ❌ Could not load world — generating fallback.');
-    const fallback = await generateWorldFromRegionMap(seedID);
-    if (!fallback) return;
-    handleWorldUpdate(fallback);
-    return;
-  }
-
-  handleWorldUpdate(result);
-
-
+  // Listen for redraw events (from dev tools, etc.)
   document.addEventListener('redrawMap', () => {
-    const settings = getSettings();
     const { biomeMap, chunks } = currentWorld;
+    const settings = getSettings();
     const tileSize = settings.tileSize || 16;
     const render = renderMap(biomeMap, settings, chunks, tileSize);
     if (render) drawFn = render.draw;
@@ -64,23 +71,16 @@ async function init() {
 }
 
 /**
- * Renders the given world object using renderMap()
+ * Updates the canvas and HUD with the given world object
  */
 function handleWorldUpdate(result) {
-  // If fallback format (nested world), unwrap it
-  if (result.world && result.world.biomeMap) {
-    result = {
-      ...result.world,
-      chunks: result.chunks || []
-    };
-  }
-
   if (!result || !Array.isArray(result.biomeMap) || !result.biomeMap[0]) {
     console.warn('[Main] ❌ Invalid world data passed to handleWorldUpdate:', result);
     return;
   }
 
   currentWorld = result;
+
   const { biomeMap, chunks } = result;
   const settings = getSettings();
   const tileSize = settings.tileSize || 16;
@@ -90,7 +90,7 @@ function handleWorldUpdate(result) {
     drawFn = render.draw;
     enableHoverTooltip(render.canvas, biomeMap, settings);
     initKeyboardControls(biomeMap, drawFn);
-    }
   }
+}
 
 window.addEventListener('DOMContentLoaded', init);

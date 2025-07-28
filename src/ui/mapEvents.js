@@ -62,3 +62,7 @@ export function enableTileClickHandler(canvas, biomeMap, tileSize) {
         }
     });
 }
+
+export function dispatchRedraw() {
+  document.dispatchEvent(new CustomEvent('redrawMap'));
+}

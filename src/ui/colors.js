@@ -8,7 +8,7 @@ export const biomeColors = {
   mountain: '#888888',
   grassland: '#7CFC00',
   swamp: '#556B2F',
-  bedrock: '#808080',
+  bedrock: '#f10e0eff',
   unknown: '#ff00ff' // fallback
 };
 

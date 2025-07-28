@@ -1,38 +1,85 @@
 {
-  "NW": {
-    "label": "Northwest",
-    "landmassSize": "large"
-  },
-  "N": {
-    "label": "North",
-    "landmassSize": "medium"
-  },
-  "NE": {
-    "label": "Northeast",
-    "landmassSize": "small"
-  },
-  "W": {
-    "label": "West",
-    "landmassSize": "medium"
-  },
-  "C": {
-    "label": "Center",
-    "landmassSize": "large"
-  },
-  "E": {
-    "label": "East",
-    "landmassSize": "medium"
-  },
-  "SW": {
-    "label": "Southwest",
-    "landmassSize": "small"
-  },
-  "S": {
-    "label": "South",
-    "landmassSize": "medium"
-  },
-  "SE": {
-    "label": "Southeast",
-    "landmassSize": "large"
+  "regions": {
+    "NW": {
+      "label": "Northwest",
+      "position": [0, 0],
+      "landmassSize": "Large",       
+      "elevationProfile": "hilly",   
+      "biomeBias": ["forest", "tundra"],
+      "allowStructures": true,
+      "enabled": true
+    },
+    "N": {
+      "label": "North",
+      "position": [1, 0],
+      "landmassSize": "Medium",
+      "elevationProfile": "flat",
+      "biomeBias": ["plains", "grass"],
+      "allowStructures": true,
+      "enabled": true
+    },
+    "NE": {
+      "label": "Northeast",
+      "position": [2, 0],
+      "landmassSize": "Small",
+      "elevationProfile": "mountainous",
+      "biomeBias": ["ice", "rocky"],
+      "allowStructures": false,
+      "enabled": true
+    },
+    "W": {
+      "label": "West",
+      "position": [0, 1],
+      "landmassSize": "Medium",
+      "elevationProfile": "flat",
+      "biomeBias": ["desert"],
+      "allowStructures": true,
+      "enabled": true
+    },
+    "C": {
+      "label": "Central",
+      "position": [1, 1],
+      "landmassSize": "Large",
+      "elevationProfile": "varied",
+      "biomeBias": ["plains", "forest"],
+      "allowStructures": true,
+      "enabled": true
+    },
+    "E": {
+      "label": "East",
+      "position": [2, 1],
+      "landmassSize": "Medium",
+      "elevationProfile": "hilly",
+      "biomeBias": ["jungle"],
+      "allowStructures": true,
+      "enabled": true
+    },
+    "SW": {
+      "label": "Southwest",
+      "position": [0, 2],
+      "landmassSize": "Small",
+      "elevationProfile": "flat",
+      "biomeBias": ["desert", "rocky"],
+      "allowStructures": false,
+      "enabled": true
+    },
+    "S": {
+      "label": "South",
+      "position": [1, 2],
+      "landmassSize": "Medium",
+      "elevationProfile": "hilly",
+      "biomeBias": ["grass"],
+      "allowStructures": true,
+      "enabled": true
+    },
+    "SE": {
+      "label": "Southeast",
+      "position": [2, 2],
+      "landmassSize": "Large",
+      "elevationProfile": "mountainous",
+      "biomeBias": ["mountain", "tundra"],
+      "allowStructures": false,
+      "enabled": true
+    }
   }
 }
